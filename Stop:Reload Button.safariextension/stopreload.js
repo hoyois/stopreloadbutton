@@ -27,7 +27,7 @@ if(window === window.top) {
         }
     }
     
-    window.addEventListener("load", handleLoadEvent, true);
+    window.addEventListener("pageshow", handleLoadEvent, true);
     window.addEventListener("beforeunload", handleBeforeUnloadEvent, true);
     safari.self.addEventListener("message", handleMessage, false);
 }
