@@ -4,11 +4,13 @@ if(window === window.top) {
     safari.self.tab.dispatchMessage("0", true);
     
     function handleLoadEvent(event) {
+        window.addEventListener("beforeunload", handleBeforeUnloadEvent, true);
         isLoading = false;
         safari.self.tab.dispatchMessage("0", false);
     }
     
     function handleBeforeUnloadEvent(event) {
+        window.removeEventListener("beforeunload", handleBeforeUnloadEvent, true);
         safari.self.tab.dispatchMessage("0", true);
     }
     
@@ -28,6 +30,5 @@ if(window === window.top) {
     }
     
     window.addEventListener("pageshow", handleLoadEvent, true);
-    window.addEventListener("beforeunload", handleBeforeUnloadEvent, true);
     safari.self.addEventListener("message", handleMessage, false);
 }
