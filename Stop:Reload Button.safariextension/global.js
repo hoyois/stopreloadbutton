@@ -1,35 +1,41 @@
-var button = safari.extension.toolbarItems[0];
+function activeToolbarItem() {
+    for(var i = 0; i < safari.extension.toolbarItems.length; i++) {
+        if(safari.extension.toolbarItems[i].browserWindow === safari.application.activeBrowserWindow) {
+            return safari.extension.toolbarItems[i];
+        }
+    }
+}
 
-function makeReloadButton() {
+function makeReloadButton(button) {
     button.image = safari.extension.baseURI + "reload_button.png";
     button.label = "Reload";
     button.toolTip = "Reload";
 }
 
-function makeStopButton() {
+function makeStopButton(button) {
     button.image = safari.extension.baseURI + "stop_button.png";
     button.label = "Stop";
     button.toolTip = "Stop";
 }
 
-function makeInitialButton() {
-    if(safari.extension.settings.initialButton === "stop") makeStopButton();
-    else makeReloadButton();
+function makeInitialButton(button) {
+    if(safari.extension.settings.initialButton === "stop") makeStopButton(button);
+    else makeReloadButton(button);
 }
 
 function execute(event) {
-    if(button.label === "Reload") {
-        makeStopButton();
+    if(event.target.label === "Reload") {
+        makeStopButton(event.target);
         event.target.browserWindow.activeTab.page.dispatchMessage("reload", "");
     } else {
-        makeReloadButton();
+        makeReloadButton(event.target);
         event.target.browserWindow.activeTab.page.dispatchMessage("stop", "");
     }
 }
  
 function validate(event) {
     if(!event.target.browserWindow.activeTab.page || !event.target.browserWindow.activeTab.url) {
-        makeInitialButton();
+        makeInitialButton(event.target);
         event.target.disabled = true;
     } else {
         event.target.disabled = false;
@@ -38,10 +44,11 @@ function validate(event) {
 }
 
 function handleMessage(event) {
-    if(!event.target.browserWindow.activeTab.page) return;
+    var button = activeToolbarItem();
+    if(!button || !button.browserWindow.activeTab.page) return;
     button.disabled = false;
-    if(event.message) makeStopButton();
-    else makeReloadButton();
+    if(event.message) makeStopButton(button);
+    else makeReloadButton(button);
 }
 
 safari.application.addEventListener("command", execute, false);
