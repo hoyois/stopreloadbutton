@@ -1,24 +1,29 @@
 if(window === window.top) {
     var isLoading = true;
-    var isActive = true;
     
-    safari.self.tab.dispatchMessage("isLoading", true);
+    // Need to register this tab in the global page
+    // The only way to do it is with a fake beforeload event...
+    var event = document.createEvent("HTMLEvents");
+    event.initEvent("beforeload", false, true);
+    var tabID = safari.self.tab.canLoad(event, "");
+    
+    safari.self.tab.dispatchMessage("loading", tabID);
  
     function handleLoadEvent(event) {
         window.addEventListener("beforeunload", handleBeforeUnloadEvent, true);
         isLoading = false;
-        if(isActive) safari.self.tab.dispatchMessage("isLoading", false);
+        safari.self.tab.dispatchMessage("done", tabID);
     }
     
     function handleBeforeUnloadEvent(event) {
         window.removeEventListener("beforeunload", handleBeforeUnloadEvent, true);
-        if(isActive) safari.self.tab.dispatchMessage("isLoading", true);
+        safari.self.tab.dispatchMessage("unload", tabID);
     }
     
     function handleMessage(event) {
         switch(event.name) {
             case "validate":
-                if(isActive) safari.self.tab.dispatchMessage("isLoading", isLoading);
+                safari.self.tab.dispatchMessage(isLoading ? "loading" : "done", tabID);
                 break;
             case "reload":
                 window.location.reload();
@@ -31,7 +36,5 @@ if(window === window.top) {
     }
     
     window.addEventListener("pageshow", handleLoadEvent, true);
-    window.addEventListener("focus", function() {isActive = true;}, true);
-    window.addEventListener("blur", function() {isActive = false;}, true);
     safari.self.addEventListener("message", handleMessage, false);
 }
