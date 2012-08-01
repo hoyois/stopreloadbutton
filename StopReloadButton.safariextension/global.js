@@ -27,7 +27,6 @@ function makeInitialButton(button) {
 function execute(event) {
 	var tab = event.target.browserWindow.activeTab;
 	if(event.target.label === "Reload") {
-		makeStopButton(event.target);
 		tab.page.dispatchMessage("reload", "");
 	} else {
 		makeReloadButton(event.target);
@@ -48,37 +47,23 @@ function validate(event) {
 	}
 }
 
-function handleBeforeNavigate(event) {
+function handleMessage(event) {
 	var tab = event.target;
-	tab.isLoading = event.url !== null;
+	tab.isLoading = event.message && tab.page;
 	if(tab === tab.browserWindow.activeTab) {
 		var button = toolbarItem(tab.browserWindow);
 		if(!button) return;
-		if(event.url) {
+		if(tab.page) {
 			button.disabled = false;
-			makeStopButton(button);
+			if(event.message) makeStopButton(button);
+			else makeReloadButton(button);
 		} else {
-			makeInitialButton(event.target);
+			makeInitialButton(button);
 			button.disabled = true;
 		}
 	}
 }
 
-// Cannot use the navigate event because it is fired after beforeNavigate
-// when leaving a loading page
-function handleMessage(event) {
-	var tab = event.target;
-	tab.isLoading = false;
-	if(!tab.page) return; // bookmarks:// or topsites://
-	if(tab === tab.browserWindow.activeTab) {
-		var button = toolbarItem(tab.browserWindow);
-		if(!button) return;
-		button.disabled = false;
-		makeReloadButton(button);
-	}
-}
-
 safari.application.addEventListener("command", execute, false);
 safari.application.addEventListener("validate", validate, false);
-safari.application.addEventListener("beforeNavigate", handleBeforeNavigate, true);
 safari.application.addEventListener("message", handleMessage, false);

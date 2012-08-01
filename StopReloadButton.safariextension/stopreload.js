@@ -1,8 +1,10 @@
 if(window === window.top) {
 	
+	safari.self.tab.dispatchMessage("loading", true);
+	
 	function handleLoadEvent(event) {
 		// NB "load" is fired on bookmarks:// and topsites:// also!
-		safari.self.tab.dispatchMessage("load");
+		safari.self.tab.dispatchMessage("loading", false);
 	}
 	
 	function handleMessage(event) {
