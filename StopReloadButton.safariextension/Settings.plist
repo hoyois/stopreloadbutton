@@ -4,22 +4,22 @@
 <array>
 	<dict>
 		<key>DefaultValue</key>
-		<string>stop</string>
+		<string>reload</string>
 		<key>Key</key>
 		<string>initialButton</string>
 		<key>Title</key>
 		<string>Inactive state</string>
 		<key>Titles</key>
 		<array>
-			<string>Stop</string>
 			<string>Reload</string>
+			<string>Stop</string>
 		</array>
 		<key>Type</key>
 		<string>PopUpButton</string>
 		<key>Values</key>
 		<array>
-			<string>stop</string>
 			<string>reload</string>
+			<string>stop</string>
 		</array>
 	</dict>
 </array>

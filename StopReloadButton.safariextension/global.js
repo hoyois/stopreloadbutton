@@ -1,62 +1,84 @@
 // Returns the toolbar item in a given window, if any
 function toolbarItem(window) {
-    for(var i = 0; i < safari.extension.toolbarItems.length; i++) {
-        if(safari.extension.toolbarItems[i].browserWindow === window) {
-            return safari.extension.toolbarItems[i];
-        }
-    }
+	for(var i = 0; i < safari.extension.toolbarItems.length; i++) {
+		if(safari.extension.toolbarItems[i].browserWindow === window) {
+			return safari.extension.toolbarItems[i];
+		}
+	}
 }
 
 function makeReloadButton(button) {
-    button.image = safari.extension.baseURI + "reload_button.png";
-    button.label = "Reload";
-    button.toolTip = "Reload";
+	button.image = safari.extension.baseURI + "reload.pdf";
+	button.label = "Reload";
+	button.toolTip = "Reload";
 }
 
 function makeStopButton(button) {
-    button.image = safari.extension.baseURI + "stop_button.png";
-    button.label = "Stop";
-    button.toolTip = "Stop";
+	button.image = safari.extension.baseURI + "stop.pdf";
+	button.label = "Stop";
+	button.toolTip = "Stop";
 }
 
 function makeInitialButton(button) {
-    if(safari.extension.settings.initialButton === "stop") makeStopButton(button);
-    else makeReloadButton(button);
+	if(safari.extension.settings.initialButton === "stop") makeStopButton(button);
+	else makeReloadButton(button);
 }
 
 function execute(event) {
-    if(event.target.label === "Reload") {
-        makeStopButton(event.target);
-        event.target.browserWindow.activeTab.page.dispatchMessage("reload", "");
-    } else {
-        makeReloadButton(event.target);
-        event.target.browserWindow.activeTab.page.dispatchMessage("stop", "");
-    }
-}
- 
-function validate(event) {
-    if(!event.target.browserWindow.activeTab.page || !event.target.browserWindow.activeTab.url) {
-        makeInitialButton(event.target);
-        event.target.disabled = true;
-    } else {
-        event.target.disabled = false;
-        event.target.browserWindow.activeTab.page.dispatchMessage("validate", "");
-    }
+	var tab = event.target.browserWindow.activeTab;
+	if(event.target.label === "Reload") {
+		makeStopButton(event.target);
+		tab.page.dispatchMessage("reload", "");
+	} else {
+		makeReloadButton(event.target);
+		tab.page.dispatchMessage("stop", "");
+		tab.isLoading = false;
+	}
 }
 
+function validate(event) {
+	var tab = event.target.browserWindow.activeTab;
+	if(!tab || (!tab.isLoading && (!tab.page || !tab.url))) {
+		makeInitialButton(event.target);
+		event.target.disabled = true;
+	} else {
+		event.target.disabled = false;
+		if(tab.isLoading) makeStopButton(event.target);
+		else makeReloadButton(event.target);
+	}
+}
+
+function handleBeforeNavigate(event) {
+	var tab = event.target;
+	tab.isLoading = event.url !== null;
+	if(tab === tab.browserWindow.activeTab) {
+		var button = toolbarItem(tab.browserWindow);
+		if(!button) return;
+		if(event.url) {
+			button.disabled = false;
+			makeStopButton(button);
+		} else {
+			makeInitialButton(event.target);
+			button.disabled = true;
+		}
+	}
+}
+
+// Cannot use the navigate event because it is fired after beforeNavigate
+// when leaving a loading page
 function handleMessage(event) {
-    var tab = event.target;
-    // Only change the button if the message comes from an active tab
-    if(tab.browserWindow.activeTab === tab && tab.page) {
-        var button = toolbarItem(tab.browserWindow);
-        if(!button) return;
-        button.disabled = false;
-        if(event.message) makeStopButton(button);
-        else makeReloadButton(button);
-    }
+	var tab = event.target;
+	tab.isLoading = false;
+	if(!tab.page) return; // bookmarks:// or topsites://
+	if(tab === tab.browserWindow.activeTab) {
+		var button = toolbarItem(tab.browserWindow);
+		if(!button) return;
+		button.disabled = false;
+		makeReloadButton(button);
+	}
 }
 
 safari.application.addEventListener("command", execute, false);
 safari.application.addEventListener("validate", validate, false);
+safari.application.addEventListener("beforeNavigate", handleBeforeNavigate, true);
 safari.application.addEventListener("message", handleMessage, false);
-

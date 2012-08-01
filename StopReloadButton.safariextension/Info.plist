@@ -5,7 +5,7 @@
 	<key>Author</key>
 	<string>Marc Hoyois</string>
 	<key>Builder Version</key>
-	<string>7534.48.3</string>
+	<string>8536.25</string>
 	<key>CFBundleDisplayName</key>
 	<string>Stop/Reload Button</string>
 	<key>CFBundleIdentifier</key>
@@ -13,9 +13,9 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.3</string>
+	<string>1.4</string>
 	<key>CFBundleVersion</key>
-	<string>1.3</string>
+	<string>4</string>
 	<key>Chrome</key>
 	<dict>
 		<key>Global Page</key>
@@ -28,15 +28,15 @@
 				<key>Identifier</key>
 				<string>stopreload</string>
 				<key>Image</key>
-				<string>stop_button.png</string>
+				<string>reload.pdf</string>
 				<key>Include By Default</key>
 				<true/>
 				<key>Label</key>
-				<string>Stop</string>
+				<string>Reload</string>
 				<key>Palette Label</key>
 				<string>Stop/Reload</string>
 				<key>Tool Tip</key>
-				<string>Stop</string>
+				<string>Reload</string>
 			</dict>
 		</array>
 	</dict>
