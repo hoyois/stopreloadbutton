@@ -69,12 +69,16 @@ function handleBeforeNavigate(event) {
 function handleMessage(event) {
 	var tab = event.target;
 	tab.isLoading = false;
-	if(!tab.page) return; // bookmarks:// or topsites://
 	if(tab === tab.browserWindow.activeTab) {
 		var button = toolbarItem(tab.browserWindow);
 		if(!button) return;
-		button.disabled = false;
-		makeReloadButton(button);
+		if(event.message === "bookmarks:" || event.message === "topsites:") {
+			button.disabled = true;
+			makeInitialButton(button);
+		} else {
+			button.disabled = false;
+			makeReloadButton(button);
+		}
 	}
 }
 
